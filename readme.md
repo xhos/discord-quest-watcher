@@ -4,7 +4,7 @@ receive notifications when new discord quests are released. filter for orb quest
 
 minimalistic, single-dependency go app that reliably logs in via user token, bypassing captchas and rate limits. fully self-hostable and private.
 
-**[how to get your discord token →](https://gist.github.com/MarvNC/e601f3603df22f36ebd3102c501116c6#file-get-discord-token-from-browser-md)**
+[how to get your discord token](https://gist.github.com/MarvNC/e601f3603df22f36ebd3102c501116c6#file-get-discord-token-from-browser-md)
 
 ## features
 
@@ -15,15 +15,17 @@ minimalistic, single-dependency go app that reliably logs in via user token, byp
 
 ## environment variables
 
-- `TOKEN` - discord authentication token (required)
-- `DISCORD_WEBHOOK_URL` - webhook for notifications (required)
-- `REWARD_FILTER` - "orbs" or "all" (default: "all")
+| variable              | required | default | description                                                                 |
+|-----------------------|----------|---------|-----------------------------------------------------------------------------|
+| `TOKEN`               | yes      | —       | discord authentication token                                                |
+| `DISCORD_WEBHOOK_URL` | yes      | —       | webhook URL used for sending notifications                                  |
+| `REWARD_FILTER`       | no       | `all`   | filter for rewards: `orbs` (only orbs) or `all` (include all rewards)       |
 
 ## usage
 
 ### docker (recommended)
 
-```bash
+```shell
 docker run -d \
            --name discord-quest-watcher \
            --restart=unless-stopped \
@@ -35,7 +37,7 @@ docker run -d \
 
 ### local
 
-```bash
+```shell
 export TOKEN="your_discord_token"
 export DISCORD_WEBHOOK_URL="your_webhook_url"
 export REWARD_FILTER="orbs"
