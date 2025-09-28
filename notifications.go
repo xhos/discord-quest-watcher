@@ -4,35 +4,33 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
-
-	"github.com/charmbracelet/log"
 )
 
 func sendNotifications(webhook string, quests []Quest) {
-	for _, quest := range quests {
-		color := 0x99AAB5 // gray
-		switch quest.RewardType {
-		case "orbs":
-			color = 0x5865F2 // blue
-		case "decor":
-			color = 0x57F287 // green
-		}
+	colors := map[string]int{"orbs": 0x5865F2, "decor": 0x57F287}
 
-		embed := map[string]any{
-			"title":       fmt.Sprintf("🔮 New %s Quest!", quest.RewardType),
-			"description": fmt.Sprintf("**%s**\n%s\nExpires: %s", quest.Name, quest.Reward, quest.ExpiresAt),
-			"color":       color,
+	for _, quest := range quests {
+		color := 0x99AAB5 // default gray
+		if c, ok := colors[quest.RewardType]; ok {
+			color = c
 		}
 
 		payload := map[string]any{
-			"embeds": []any{embed},
+			"embeds": []any{map[string]any{
+				"title":       fmt.Sprintf("🔮 New %s Quest!", quest.RewardType),
+				"description": fmt.Sprintf("**%s**\n%s\nExpires: %s", quest.Name, quest.Reward, quest.ExpiresAt),
+				"color":       color,
+			}},
 		}
 
-		data, _ := json.Marshal(payload)
-		resp, _ := http.Post(webhook, "application/json", bytes.NewBuffer(data))
-		resp.Body.Close()
+		if data, _ := json.Marshal(payload); data != nil {
+			if resp, _ := http.Post(webhook, "application/json", bytes.NewBuffer(data)); resp != nil {
+				resp.Body.Close()
+			}
+		}
 
-		log.Info("sent notification", "quest", quest.Name)
+		log.Printf("sent notification for quest: %s", quest.Name)
 	}
 }

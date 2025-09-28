@@ -2,12 +2,31 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/go-rod/rod"
 )
+
+func filterQuests(quests []Quest, fn func(Quest) bool) []Quest {
+	var result []Quest
+	for _, q := range quests {
+		if fn(q) {
+			result = append(result, q)
+		}
+	}
+	return result
+}
+
+func contains(quests []Quest, id string) bool {
+	for _, q := range quests {
+		if q.ID == id {
+			return true
+		}
+	}
+	return false
+}
 
 func checkQuests(token, webhook, rewardFilter string) error {
 	browser, _ := createBrowser()
@@ -16,45 +35,30 @@ func checkQuests(token, webhook, rewardFilter string) error {
 	authenticateWithToken(browser, token)
 
 	allQuests, _ := extractQuests(browser)
-	log.Info("extracted quests", "count", len(allQuests))
+	log.Printf("extracted quests: count=%d", len(allQuests))
 
 	// keep only quests we care about
 	wantedQuests := allQuests
 	if rewardFilter == "orbs" {
-		wantedQuests = []Quest{}
-		for _, quest := range allQuests {
-			if quest.RewardType == "orbs" {
-				wantedQuests = append(wantedQuests, quest)
-			}
-		}
+		wantedQuests = filterQuests(allQuests, func(q Quest) bool { return q.RewardType == "orbs" })
 	}
-	log.Info("filtered quests", "count", len(wantedQuests), "filter", rewardFilter)
+	log.Printf("filtered quests: count=%d filter=%s", len(wantedQuests), rewardFilter)
 
 	// find which ones are actually new
 	previousQuests := questStorage(nil)
-	newQuests := []Quest{}
-	for _, current := range wantedQuests {
-		isAlreadyKnown := false
-		for _, previous := range previousQuests {
-			if current.ID == previous.ID {
-				isAlreadyKnown = true
-				break
-			}
-		}
-		if !isAlreadyKnown {
-			newQuests = append(newQuests, current)
-		}
-	}
-	log.Info("new quests", "count", len(newQuests))
+	newQuests := filterQuests(wantedQuests, func(current Quest) bool {
+		return !contains(previousQuests, current.ID)
+	})
+	log.Printf("new quests: count=%d", len(newQuests))
 
 	// notify about new ones
 	if len(newQuests) > 0 {
-		log.Info("sending notifications", "count", len(newQuests))
+		log.Printf("sending notifications: count=%d", len(newQuests))
 		sendNotifications(webhook, newQuests)
 	}
 
 	// remember what we found
-	log.Info("saving quests", "count", len(wantedQuests))
+	log.Printf("saving quests: count=%d", len(wantedQuests))
 	questStorage(wantedQuests)
 	return nil
 }
@@ -101,15 +105,17 @@ func questStorage(quests []Quest) []Quest {
 
 	// load existing if reading
 	if quests == nil {
-		data, _ := os.ReadFile(file)
 		var loaded []Quest
-		json.Unmarshal(data, &loaded)
+		if data, _ := os.ReadFile(file); data != nil {
+			json.Unmarshal(data, &loaded)
+		}
 		return loaded
 	}
 
 	// save if writing
 	os.MkdirAll("/data", 0755)
-	data, _ := json.MarshalIndent(quests, "", "  ")
-	os.WriteFile(file, data, 0644)
+	if data, _ := json.MarshalIndent(quests, "", "  "); data != nil {
+		os.WriteFile(file, data, 0644)
+	}
 	return quests
 }

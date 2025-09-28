@@ -1,10 +1,9 @@
 package main
 
 import (
+	"log"
 	"os"
 	"time"
-
-	"github.com/charmbracelet/log"
 )
 
 type Quest struct {
@@ -16,28 +15,25 @@ type Quest struct {
 }
 
 func main() {
-	token := os.Getenv("TOKEN")
-	webhook := os.Getenv("DISCORD_WEBHOOK_URL")
-	rewardFilter := getEnv("REWARD_FILTER", "all") // "all" or "orbs"
+	token, webhook := os.Getenv("TOKEN"), os.Getenv("DISCORD_WEBHOOK_URL")
+	rewardFilter := func() string {
+		if value := os.Getenv("REWARD_FILTER"); value != "" {
+			return value
+		}
+		return "all"
+	}()
 
 	if token == "" || webhook == "" {
 		log.Fatal("TOKEN and DISCORD_WEBHOOK_URL required")
 	}
 
-	log.Info("starting Discord quest monitor", "reward_filter", rewardFilter)
+	log.Printf("starting Discord quest monitor with reward_filter=%s", rewardFilter)
 
 	for {
-		log.Info("checking for new quests")
+		log.Println("checking for new quests")
 		if err := checkQuests(token, webhook, rewardFilter); err != nil {
-			log.Error("quest check failed", "error", err)
+			log.Printf("quest check failed: %v", err)
 		}
 		time.Sleep(30 * time.Minute)
 	}
-}
-
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
 }
