@@ -6,6 +6,9 @@ minimalistic, single-dependency go app that reliably logs in via a user token, b
 
 [how to get your discord token](https://gist.github.com/MarvNC/e601f3603df22f36ebd3102c501116c6#file-get-discord-token-from-browser-md)
 
+> [!WARNING]  
+> this app uses your user token which technically breaks Discord ToS, so use at your own risk.
+
 ## features
 
 - filters for orb rewards or all quest types
