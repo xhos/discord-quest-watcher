@@ -4,10 +4,15 @@ receive notifications when new discord quests are released. filter for orb quest
 
 minimalistic, single-dependency go app that reliably logs in via a user token, bypassing captchas and rate limits. fully self-hostable and private.
 
-[how to get your discord token](https://gist.github.com/MarvNC/e601f3603df22f36ebd3102c501116c6#file-get-discord-token-from-browser-md)
+> why?
 
-> [!WARNING]  
-> this app uses your user token which technically breaks Discord ToS, so use at your own risk.
+I couldn't find any existing tools that would reliably ping me when a new orb quest drops, so i threw this little tool together in an evening.
+
+> but why would one care about those quests in the first place?
+
+quest give orb -> orb allow monkey brain get free shiny thing. 
+
+no but seriously, I like the look of some discord user decor, but there's no way im paying for it. oh and by the way, you dont have to actually *complete* the quest, this script does it for you: https://gist.github.com/aamiaa/204cd9d42013ded9faf646fae7f89fbb
 
 ## features
 
@@ -25,6 +30,11 @@ minimalistic, single-dependency go app that reliably logs in via a user token, b
 | `REWARD_FILTER`       | no       | `all`   | filter for rewards: `orbs` (only orbs) or `all` (include all rewards)       |
 
 ## usage
+
+> [!WARNING]  
+> this app uses your user token which technically breaks Discord ToS, so use at your own risk.
+
+[how to get your user token](https://gist.github.com/MarvNC/e601f3603df22f36ebd3102c501116c6#file-get-discord-token-from-browser-md)
 
 ### docker (recommended)
 
