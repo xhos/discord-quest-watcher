@@ -1,3 +1,13 @@
 .git/
 .github/
 *.md
+.direnv
+.devenv
+.pre-commit-config.yaml
+flale.lock
+flake.nix
+.env.example
+.envrc
+.env
+*.js
+*.sh

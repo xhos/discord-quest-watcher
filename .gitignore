@@ -1,0 +1,5 @@
+.direnv
+.devenv
+.pre-commit-config.yaml
+.env
+data/

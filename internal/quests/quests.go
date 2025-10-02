@@ -1,16 +1,23 @@
-package main
+package quests
 
 import (
+	_ "embed"
 	"encoding/json"
 	"log"
 	"os"
 	"time"
 
+	"discord-quest-watcher/internal/types"
+	"discord-quest-watcher/internal/webhook"
+
 	"github.com/go-rod/rod"
 )
 
-func filterQuests(quests []Quest, fn func(Quest) bool) []Quest {
-	var result []Quest
+//go:embed extract-quests.js
+var extractQuestsScript string
+
+func filterQuests(quests []types.Quest, fn func(types.Quest) bool) []types.Quest {
+	var result []types.Quest
 	for _, q := range quests {
 		if fn(q) {
 			result = append(result, q)
@@ -19,7 +26,7 @@ func filterQuests(quests []Quest, fn func(Quest) bool) []Quest {
 	return result
 }
 
-func contains(quests []Quest, id string) bool {
+func contains(quests []types.Quest, id string) bool {
 	for _, q := range quests {
 		if q.ID == id {
 			return true
@@ -28,11 +35,7 @@ func contains(quests []Quest, id string) bool {
 	return false
 }
 
-func checkQuests(token, webhook, rewardFilter string) error {
-	browser, _ := createBrowser()
-	defer browser.MustClose()
-
-	authenticateWithToken(browser, token)
+func CheckQuests(browser *rod.Browser, webhookURL, rewardFilter string) error {
 
 	allQuests, _ := extractQuests(browser)
 	log.Printf("extracted quests: count=%d", len(allQuests))
@@ -40,13 +43,13 @@ func checkQuests(token, webhook, rewardFilter string) error {
 	// keep only quests we care about
 	wantedQuests := allQuests
 	if rewardFilter == "orbs" {
-		wantedQuests = filterQuests(allQuests, func(q Quest) bool { return q.RewardType == "orbs" })
+		wantedQuests = filterQuests(allQuests, func(q types.Quest) bool { return q.RewardType == "orbs" })
 	}
 	log.Printf("filtered quests: count=%d filter=%s", len(wantedQuests), rewardFilter)
 
 	// find which ones are actually new
 	previousQuests := questStorage(nil)
-	newQuests := filterQuests(wantedQuests, func(current Quest) bool {
+	newQuests := filterQuests(wantedQuests, func(current types.Quest) bool {
 		return !contains(previousQuests, current.ID)
 	})
 	log.Printf("new quests: count=%d", len(newQuests))
@@ -54,7 +57,7 @@ func checkQuests(token, webhook, rewardFilter string) error {
 	// notify about new ones
 	if len(newQuests) > 0 {
 		log.Printf("sending notifications: count=%d", len(newQuests))
-		sendNotifications(webhook, newQuests)
+		webhook.Send(webhookURL, newQuests)
 	}
 
 	// remember what we found
@@ -63,49 +66,26 @@ func checkQuests(token, webhook, rewardFilter string) error {
 	return nil
 }
 
-func extractQuests(browser *rod.Browser) ([]Quest, error) {
+func extractQuests(browser *rod.Browser) ([]types.Quest, error) {
 	page := browser.MustPage("https://discord.com/discovery/quests").MustWaitLoad()
 	time.Sleep(10 * time.Second) // wait for react to load
 
-	result, err := page.Eval(`() => {
-		const quests = [];
-		document.querySelectorAll('[id^="quest-tile-"]').forEach(tile => {
-			const name = tile.querySelector('[class*="questName"]')?.textContent?.trim();
-			const reward = tile.querySelector('[class*="header"]')?.textContent?.replace('Claim ', '')?.trim();
-			const allText = tile.textContent;
-			const expires = allText.match(/Ends (\d{2}\/\d{2})/)?.[1];
-
-			if (name && reward && expires && !allText.includes('Quest ended')) {
-				let rewardType = 'other';
-				if (reward.toLowerCase().includes('orb')) rewardType = 'orbs';
-				else if (reward.toLowerCase().includes('avatar decoration')) rewardType = 'decor';
-
-				quests.push({
-					id: tile.id,
-					name: name,
-					reward: reward,
-					reward_type: rewardType,
-					expires_at: expires
-				});
-			}
-		});
-		return JSON.stringify(quests);
-	}`)
+	result, err := page.Eval("() => {" + extractQuestsScript + "}")
 
 	if err != nil {
 		return nil, err
 	}
 
-	var quests []Quest
+	var quests []types.Quest
 	return quests, json.Unmarshal([]byte(result.Value.String()), &quests)
 }
 
-func questStorage(quests []Quest) []Quest {
+func questStorage(quests []types.Quest) []types.Quest {
 	const file = "/data/known-quests.json"
 
 	// load existing if reading
 	if quests == nil {
-		var loaded []Quest
+		var loaded []types.Quest
 		if data, _ := os.ReadFile(file); data != nil {
 			json.Unmarshal(data, &loaded)
 		}
