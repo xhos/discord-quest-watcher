@@ -1,14 +1,15 @@
-package main
+package webhook
 
 import (
 	"bytes"
+	"discord-quest-watcher/internal/types"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 )
 
-func sendNotifications(webhook string, quests []Quest) {
+func Send(webhook string, quests []types.Quest) {
 	colors := map[string]int{"orbs": 0x5865F2, "decor": 0x57F287}
 
 	for _, quest := range quests {

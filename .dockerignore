@@ -9,4 +9,5 @@ flake.nix
 .env.example
 .envrc
 .env
-scripts/
+*.js
+*.sh

@@ -36,6 +36,7 @@
         packages = with pkgs; [
           go
           golangci-lint
+          docker
 
           (writeShellScriptBin "run" ''
             go run cmd/main.go
@@ -43,6 +44,25 @@
 
           (writeShellScriptBin "fmt" ''
             ${golangci-lint}/bin/golangci-lint fmt
+          '')
+
+          (writeShellScriptBin "dev" ''
+            set -e
+
+            if [ ! -f .env ]; then
+              echo "err: .env file not found"
+              exit 1
+            fi
+
+            mkdir -p "$(pwd)/data"
+
+            docker build -t discord-quest-watcher:dev .
+
+            docker run --rm \
+              --name discord-quest-watcher-dev \
+              --env-file .env \
+              -v "$(pwd)/data:/data" \
+              discord-quest-watcher:dev
           '')
         ];
 

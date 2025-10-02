@@ -19,7 +19,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: update script from gist
-        run: ./scripts/update-quest-script.sh
+        run: ./update-quest-script.sh
 
       - name: check for changes
         id: git-check

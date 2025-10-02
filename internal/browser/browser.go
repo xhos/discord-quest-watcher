@@ -1,4 +1,4 @@
-package main
+package browser
 
 import (
 	_ "embed"
@@ -11,10 +11,10 @@ import (
 	"github.com/go-rod/rod/lib/launcher"
 )
 
-//go:embed scripts/inject-token.js
+//go:embed inject-token.js
 var injectTokenScript string
 
-func createBrowser() (*rod.Browser, error) {
+func CreateBrowser() (*rod.Browser, error) {
 	return rod.New().ControlURL(
 		launcher.New().
 			Headless(true).
@@ -26,7 +26,7 @@ func createBrowser() (*rod.Browser, error) {
 			MustLaunch()).MustConnect(), nil
 }
 
-func authenticateWithToken(browser *rod.Browser, token string) error {
+func AuthenticateWithToken(browser *rod.Browser, token string) error {
 	page := browser.MustPage("https://discord.com/login").MustWaitLoad()
 
 	// inject token

@@ -1,4 +1,4 @@
-module discord-orbs-watcher
+module discord-quest-watcher
 
 go 1.25
 

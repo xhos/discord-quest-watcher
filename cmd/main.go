@@ -1,19 +1,13 @@
 package main
 
 import (
+	"discord-quest-watcher/internal/browser"
+	"discord-quest-watcher/internal/quests"
 	"log"
 	"os"
 	"strconv"
 	"time"
 )
-
-type Quest struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Reward     string `json:"reward"`
-	RewardType string `json:"reward_type"` // "orbs", "decor", "other"
-	ExpiresAt  string `json:"expires_at"`
-}
 
 func main() {
 	token, webhook := os.Getenv("TOKEN"), os.Getenv("DISCORD_WEBHOOK_URL")
@@ -40,9 +34,20 @@ func main() {
 
 	log.Printf("starting Discord quest monitor with reward_filter=%s, check_interval=%d minutes", rewardFilter, checkInterval)
 
+	// create browser and authenticate once
+	br, err := browser.CreateBrowser()
+	if err != nil {
+		log.Fatalf("failed to create browser: %v", err)
+	}
+	defer br.MustClose()
+
+	if err := browser.AuthenticateWithToken(br, token); err != nil {
+		log.Fatalf("failed to authenticate: %v", err)
+	}
+
 	for {
 		log.Println("checking for new quests")
-		if err := checkQuests(token, webhook, rewardFilter); err != nil {
+		if err := quests.CheckQuests(br, webhook, rewardFilter); err != nil {
 			log.Printf("quest check failed: %v", err)
 		}
 		time.Sleep(time.Duration(checkInterval) * time.Minute)
