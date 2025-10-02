@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -23,17 +24,27 @@ func main() {
 		return "all"
 	}()
 
+	checkInterval := func() int {
+		if value := os.Getenv("FETCH_INTERVAL"); value != "" {
+			if minutes, err := strconv.Atoi(value); err == nil && minutes > 0 {
+				return minutes
+			}
+			log.Printf("invalid FETCH_INTERVAL=%s, using default 30", value)
+		}
+		return 30
+	}()
+
 	if token == "" || webhook == "" {
 		log.Fatal("TOKEN and DISCORD_WEBHOOK_URL required")
 	}
 
-	log.Printf("starting Discord quest monitor with reward_filter=%s", rewardFilter)
+	log.Printf("starting Discord quest monitor with reward_filter=%s, check_interval=%d minutes", rewardFilter, checkInterval)
 
 	for {
 		log.Println("checking for new quests")
 		if err := checkQuests(token, webhook, rewardFilter); err != nil {
 			log.Printf("quest check failed: %v", err)
 		}
-		time.Sleep(30 * time.Minute)
+		time.Sleep(time.Duration(checkInterval) * time.Minute)
 	}
 }
