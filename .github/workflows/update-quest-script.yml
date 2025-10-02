@@ -1,0 +1,48 @@
+name: update quest script
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: update script from gist
+        run: ./scripts/update-quest-script.sh
+
+      - name: check for changes
+        id: git-check
+        run: |
+          if git diff --exit-code scripts/CompleteDiscordQuest.js; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: create pull request
+        if: steps.git-check.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update quest completion script"
+          branch: update-quest-script
+          delete-branch: true
+          title: "chore: update quest completion script"
+          body: |
+            Automated update of the Discord quest script from source gist.
+
+            https://gist.github.com/aamiaa/204cd9d42013ded9faf646fae7f89fbb
+          labels: |
+            dependencies
+            automated

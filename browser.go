@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"log"
 	"strings"
@@ -9,6 +10,9 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
 )
+
+//go:embed scripts/inject-token.js
+var injectTokenScript string
 
 func createBrowser() (*rod.Browser, error) {
 	return rod.New().ControlURL(
@@ -26,14 +30,8 @@ func authenticateWithToken(browser *rod.Browser, token string) error {
 	page := browser.MustPage("https://discord.com/login").MustWaitLoad()
 
 	// inject token
-	if _, err := page.Eval(fmt.Sprintf(`
-		() => {
-			const iframe = document.createElement('iframe');
-			document.body.appendChild(iframe);
-			iframe.contentWindow.localStorage.token = '"%s"';
-			setTimeout(() => location.reload(), 2000);
-		}
-	`, token)); err != nil {
+	script := strings.Replace(injectTokenScript, "__TOKEN__", token, 1)
+	if _, err := page.Eval("() => {" + script + "}"); err != nil {
 		return err
 	}
 
