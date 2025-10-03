@@ -6,6 +6,11 @@ on:
       - main
     tags:
       - "v*.*.*"
+    paths-ignore:
+      - "*.md"
+      - "*.yml"
+      - "*.sh"
+      - "devenv.*"
   workflow_dispatch:
 
 env:
