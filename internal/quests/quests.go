@@ -67,7 +67,7 @@ func CheckQuests(browser *rod.Browser, webhookURL, rewardFilter string) error {
 }
 
 func extractQuests(browser *rod.Browser) ([]types.Quest, error) {
-	page := browser.MustPage("https://discord.com/discovery/quests").MustWaitLoad()
+	page := browser.MustPage("https://discord.com/quest-home").MustWaitLoad()
 	time.Sleep(10 * time.Second) // wait for react to load
 
 	result, err := page.Eval("() => {" + extractQuestsScript + "}")
