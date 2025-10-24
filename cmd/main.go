@@ -28,6 +28,8 @@ func main() {
 		return 30
 	}()
 
+	runOnce := os.Getenv("RUN_ONCE") == "true"
+
 	if token == "" || webhook == "" {
 		log.Fatal("TOKEN and DISCORD_WEBHOOK_URL required")
 	}
@@ -49,6 +51,11 @@ func main() {
 		log.Println("checking for new quests")
 		if err := quests.CheckQuests(br, webhook, rewardFilter); err != nil {
 			log.Printf("quest check failed: %v", err)
+		}
+
+		if runOnce {
+			log.Println("RUN_ONCE is true, exiting after single check.")
+			break
 		}
 		time.Sleep(time.Duration(checkInterval) * time.Minute)
 	}
