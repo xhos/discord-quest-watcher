@@ -2,7 +2,7 @@ name: Scheduled Quest Check
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Runs every 30 minutes
+    - cron: '0 0 * * *' # Runs daily at midnight UTC
   workflow_dispatch:
 
 env:
