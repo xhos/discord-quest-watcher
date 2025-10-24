@@ -29,6 +29,7 @@ no but seriously, I like the look of some discord user decor, but there's no way
 | `DISCORD_WEBHOOK_URL` | yes      | —       | webhook URL used for sending notifications                                  |
 | `REWARD_FILTER`       | no       | `all`   | filter for rewards: `orbs` (only orbs) or `all` (include all rewards)       |
 | `FETCH_INTERVAL`      | no       | `30`    | interval in minutes between quest checks (must be a positive integer)       |
+| `RUN_ONCE`            | no       | `false` | if `true`, the application will run once and then exit                    |
 
 ## usage
 
