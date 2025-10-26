@@ -63,3 +63,14 @@ go run .
 ## how it works
 
 it authenticates with your discord token and navigates to the quests page in a headless chromium browser. it then scrapes the page, extracting the quest data, compares against previously seen quests, and sends webhook notifications for any new entries. state is tracked in /data/known-quests.json with 30-minute check intervals.
+
+## releasing
+
+to publish a new docker image, push a semver tag:
+
+```shell
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+this creates images tagged as `1.0.0`, `1.0`, `1`, and `latest`.
