@@ -3,6 +3,7 @@ package quests
 import (
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
 	"time"
@@ -12,6 +13,8 @@ import (
 
 	"github.com/go-rod/rod"
 )
+
+var ErrNoQuestsFound = errors.New("no quests found - page structure may have changed")
 
 //go:embed extract-quests.js
 var extractQuestsScript string
@@ -35,10 +38,15 @@ func contains(quests []types.Quest, id string) bool {
 	return false
 }
 
-func CheckQuests(browser *rod.Browser, webhookURL, rewardFilter string) error {
+func CheckQuests(browser *rod.Browser, webhookURL, rewardFilter string, runOnce bool) error {
 
 	allQuests, _ := extractQuests(browser)
 	log.Printf("extracted quests: count=%d", len(allQuests))
+
+	// in RUN_ONCE mode, fail if no quests found (likely means page structure changed)
+	if runOnce && len(allQuests) == 0 {
+		return ErrNoQuestsFound
+	}
 
 	// keep only quests we care about
 	wantedQuests := allQuests
@@ -67,7 +75,7 @@ func CheckQuests(browser *rod.Browser, webhookURL, rewardFilter string) error {
 }
 
 func extractQuests(browser *rod.Browser) ([]types.Quest, error) {
-	page := browser.MustPage("https://discord.com/quest-home").MustWaitLoad()
+	page := browser.MustPage("https://discord.com/not-quest-home").MustWaitLoad()
 	time.Sleep(10 * time.Second) // wait for react to load
 
 	result, err := page.Eval("() => {" + extractQuestsScript + "}")

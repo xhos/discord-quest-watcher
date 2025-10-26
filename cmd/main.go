@@ -34,7 +34,7 @@ func main() {
 		log.Fatal("TOKEN and DISCORD_WEBHOOK_URL required")
 	}
 
-	log.Printf("starting Discord quest monitor with reward_filter=%s, check_interval=%d minutes", rewardFilter, checkInterval)
+	log.Printf("starting Discord quest monitor with reward_filter=%s, check_interval=%d minutes, run_once=%t", rewardFilter, checkInterval, runOnce)
 
 	// create browser and authenticate once
 	br, err := browser.CreateBrowser()
@@ -49,12 +49,15 @@ func main() {
 
 	for {
 		log.Println("checking for new quests")
-		if err := quests.CheckQuests(br, webhook, rewardFilter); err != nil {
+		if err := quests.CheckQuests(br, webhook, rewardFilter, runOnce); err != nil {
 			log.Printf("quest check failed: %v", err)
+			if runOnce {
+				os.Exit(1)
+			}
 		}
 
 		if runOnce {
-			log.Println("RUN_ONCE is true, exiting after single check.")
+			log.Println("check complete, exiting")
 			break
 		}
 		time.Sleep(time.Duration(checkInterval) * time.Minute)
