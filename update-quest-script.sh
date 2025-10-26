@@ -15,7 +15,7 @@ if [ -z "$js_code" ]; then
 fi
 
 if [ -f "$output_file" ]; then
-  existing_js_code=$(sed -n '/^\/\*/,/\*\/$/!p' "$output_file")
+  existing_js_code=$(awk '/^ \*\/$/{flag=1; next} flag' "$output_file" | sed '1{/^$/d}')
 
   if [ "$js_code" = "$existing_js_code" ]; then
     echo "no changes detected in script content"
