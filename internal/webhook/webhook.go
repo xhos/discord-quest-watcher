@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 func Send(webhook string, quests []types.Quest) {
+	customMsg := os.Getenv("WEBHOOK_MESSAGE")
 	colors := map[string]int{"orbs": 0x5865F2, "decor": 0x57F287}
 
 	for _, quest := range quests {
@@ -24,6 +26,10 @@ func Send(webhook string, quests []types.Quest) {
 				"description": fmt.Sprintf("**%s**\n%s\nExpires: %s", quest.Name, quest.Reward, quest.ExpiresAt),
 				"color":       color,
 			}},
+		}
+
+		if customMsg != "" {
+			payload["content"] = customMsg
 		}
 
 		if data, _ := json.Marshal(payload); data != nil {
