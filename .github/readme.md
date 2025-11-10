@@ -30,6 +30,17 @@ no but seriously, I like the look of some discord user decor, but there's no way
 | `REWARD_FILTER`       | no       | `all`   | filter for rewards: `orbs` (only orbs) or `all` (include all rewards)       |
 | `FETCH_INTERVAL`      | no       | `30`    | interval in minutes between quest checks (must be a positive integer)       |
 | `RUN_ONCE`            | no       | `false` | if `true`, the application will run once and then exit                    |
+| `WEBHOOK_MESSAGE`     | no       | —       | additional text appended to notifications (e.g., role pings)                |
+
+### custom webhook messages
+
+notifications are sent as discord embeds. you can add a text message above the embed using the `WEBHOOK_MESSAGE` environment variable.
+
+example: ping a role
+
+```shell
+WEBHOOK_MESSAGE=<@&`1234567890123456789`>
+```
 
 ## usage
 
@@ -38,8 +49,6 @@ no but seriously, I like the look of some discord user decor, but there's no way
 
 [how to get your user token](https://gist.github.com/MarvNC/e601f3603df22f36ebd3102c501116c6#file-get-discord-token-from-browser-md)
 
-### docker (recommended)
-
 ```shell
 docker run -d \
            --name discord-quest-watcher \
@@ -47,17 +56,8 @@ docker run -d \
            -e TOKEN=your-token \
            -e DISCORD_WEBHOOK_URL=your-webhook-url \
            -e REWARD_FILTER=orbs \
+           -e WEBHOOK_MESSAGE=<@&role-id> \
            ghcr.io/xhos/discord-quest-watcher:latest
-```
-
-### local
-
-```shell
-export TOKEN="your_discord_token"
-export DISCORD_WEBHOOK_URL="your_webhook_url"
-export REWARD_FILTER="orbs"
-
-go run .
 ```
 
 ## how it works
