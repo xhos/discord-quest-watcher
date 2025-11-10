@@ -1,5 +1,7 @@
 # discord-quest-watcher
 
+<img width="400" height="248" alt="image" src="https://github.com/user-attachments/assets/3771e972-9898-450a-b1c5-32aff759fbc8" />
+
 receive notifications when new discord quests are released. filter for orb quests or monitor all quest types.
 
 minimalistic, single-dependency go app that reliably logs in via a user token, bypassing captchas and rate limits. fully self-hostable and private.
@@ -10,16 +12,9 @@ I couldn't find any existing tools that would reliably ping me when a new orb qu
 
 > but why would one care about those quests in the first place?
 
-quest give orb -> orb allow monkey brain get free shiny thing. 
+quest give orb -> orb give monkey brain get free shiny thing. 
 
 no but seriously, I like the look of some discord user decor, but there's no way im paying for it. oh and by the way, you dont have to actually *complete* the quest, this script does it for you: https://gist.github.com/aamiaa/204cd9d42013ded9faf646fae7f89fbb
-
-## features
-
-- filters for orb rewards or all quest types
-- sends discord webhook notifications when new quests appear
-- docker support
-- checks for new quests every 30 minutes
 
 ## environment variables
 
