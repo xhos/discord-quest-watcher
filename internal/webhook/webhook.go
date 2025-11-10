@@ -15,15 +15,17 @@ func Send(webhook string, quests []types.Quest) {
 	colors := map[string]int{"orbs": 0x5865F2, "decor": 0x57F287}
 
 	for _, quest := range quests {
-		color := 0x99AAB5 // default gray
+		color := 0x99AAB5
 		if c, ok := colors[quest.RewardType]; ok {
 			color = c
 		}
 
+		description := fmt.Sprintf("Reward: %s\nExpires: <t:%s:R>", quest.Reward, quest.ExpiresAt)
+
 		payload := map[string]any{
 			"embeds": []any{map[string]any{
-				"title":       fmt.Sprintf("🔮 New %s Quest!", quest.RewardType),
-				"description": fmt.Sprintf("**%s**\n%s\nExpires: %s", quest.Name, quest.Reward, quest.ExpiresAt),
+				"title":       quest.Name,
+				"description": description,
 				"color":       color,
 			}},
 		}
