@@ -12,9 +12,11 @@ I couldn't find any existing tools that would reliably ping me when a new orb qu
 
 > but why would one care about those quests in the first place?
 
-quest give orb -> orb give monkey brain get free shiny thing. 
+quest give orb -> orb give free shiny things. 
 
 no but seriously, I like the look of some discord user decor, but there's no way im paying for it. oh and by the way, you dont have to actually *complete* the quest, this script does it for you: https://gist.github.com/aamiaa/204cd9d42013ded9faf646fae7f89fbb
+
+or you can use a vencord/equicord/whateverispopularnowcord plugin. 
 
 ## environment variables
 
