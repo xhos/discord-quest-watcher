@@ -1,53 +1,58 @@
 const quests = [];
-document.querySelectorAll('[id^="quest-tile-"]').forEach(tile => {
-	const name = tile.querySelector('[class*="questName"]')?.textContent?.trim();
-	const reward = tile.querySelector('[class*="header"]')?.textContent?.replace('Claim ', '')?.trim();
-	const allText = tile.textContent;
-	const expiresMatch = allText.match(/Ends (\d{2}\/\d{2})/)?.[1];
+const tiles = document.querySelectorAll('[id^="quest-tile-"]');
 
-	if (name && reward && expiresMatch && !allText.includes('Quest ended')) {
-		let rewardType = 'other';
-		if (reward.toLowerCase().includes('orb')) rewardType = 'orbs';
-		else if (reward.toLowerCase().includes('avatar decoration')) rewardType = 'decor';
+tiles.forEach((tile, index) => {
+    const allText = tile.textContent;
 
-		const [first, second] = expiresMatch.split('/').map(Number);
-		const now = new Date();
-		let year = now.getFullYear();
+    const name = tile.querySelector('[class*="questName"]')?.textContent?.trim();
+    const reward = tile.querySelector('[class*="header"]')?.textContent?.replace('Claim ', '')?.trim();
+    const expiresMatch = allText.match(/Ends (\d{1,2}\/\d{1,2})/)?.[1];
+    const containsEnded = allText.includes('Quest ended');
+    
+    if (!name || !reward || !expiresMatch || containsEnded) return;
 
-		// date parsing sucks, but this might help:
+    let rewardType = 'other';
+    if (reward.toLowerCase().includes('orb')) rewardType = 'orbs';
+    else if (reward.toLowerCase().includes('avatar decoration')) rewardType = 'decor';
 
-		// if first > 12, it must be DD/MM, else assume MM/DD
-		let month, day;
-		if (first > 12) {
-			// must be DD/MM format
-			day = first;
-			month = second;
-		} else if (second > 12) {
-			// must be MM/DD format
-			month = first;
-			day = second;
-		} else {
-			// try both and pick the one that makes more sense
-			// assume mm/dd first
-			month = first;
-			day = second;
-		}
+    const [first, second] = expiresMatch.split('/').map(Number);
+    const now = new Date();
+    let year = now.getFullYear();
 
-		const expiryDate = new Date(Date.UTC(year, month - 1, day, 23, 59, 59));
+    // date parsing sucks, but this might help:
 
-		if (expiryDate < now) {
-			expiryDate.setFullYear(year + 1);
-		}
+    // if first > 12, it must be DD/MM, else assume MM/DD
+    let month, day;
+    if (first > 12) {
+        // must be DD/MM format
+        day = first;
+        month = second;
+    } else if (second > 12) {
+        // must be MM/DD format
+        month = first;
+        day = second;
+    } else {
+        // try both and pick the one that makes more sense
+        // assume mm/dd first
+        month = first;
+        day = second;
+    }
 
-		const expiresTimestamp = Math.floor(expiryDate.getTime() / 1000);
+    const expiryDate = new Date(Date.UTC(year, month - 1, day, 23, 59, 59));
 
-		quests.push({
-			id: tile.id,
-			name: name,
-			reward: reward,
-			reward_type: rewardType,
-			expires_at: expiresTimestamp.toString()
-		});
-	}
+    if (expiryDate < now) {
+        expiryDate.setFullYear(year + 1);
+    }
+
+    const expiresTimestamp = Math.floor(expiryDate.getTime() / 1000);
+
+    quests.push({
+        id: tile.id,
+        name: name,
+        reward: reward,
+        reward_type: rewardType,
+        expires_at: expiresTimestamp.toString()
+    });
 });
+
 return JSON.stringify(quests);
